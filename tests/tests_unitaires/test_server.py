@@ -1,6 +1,6 @@
 import server
 from tests.tests_unitaires.conftest import client
-import pytest
+
 
 
 
@@ -21,6 +21,7 @@ def test_should_return_code_200_when_purchasing_places(client):
 
 
 def test_should_update_points_of_club_when_purchasing_places(mocker, client):
+     """correction bug/Point-updates-are-not-reflected"""
      competitions = [
           {
                'name': 'Spring Festival',
@@ -64,6 +65,11 @@ def test_should_update_points_of_club_when_purchasing_places(mocker, client):
           "club":club,
           "competition":competition,
           "places":places}
+     
+     selected_club_points = [club["points"] for club in clubs if club["name"]==form_data["club"]]
+     points_update = int(selected_club_points[0])-int(places)
+
+     string_to_test = f'Points available: {str(points_update)}'.encode('utf-8')
 
      response = client.post('/purchasePlaces', data=form_data)
-     assert b'Points available: 10' in response.data
+     assert string_to_test in response.data
