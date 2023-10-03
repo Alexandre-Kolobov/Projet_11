@@ -1,7 +1,86 @@
 import server
-from tests.tests_unitaires.conftest import client
+from bs4 import BeautifulSoup
+from datetime import datetime
+
+"""
+Liste de test à réaliser:
+Error trouvés:
+     Pour '/book/<competition>/<club>' if else à tester
+"""
 
 
+def test_should_return_code_200_when_connected(client):
+     
+     email = "admin@irontemple.com"
+     form_data = {"email":email}
+
+     response = client.post('/showSummary', data=form_data)
+
+     assert response.status_code == 200
+
+
+def test_should_not_allow_booking_for_past_competition(mocker, client, competitions):
+     """correction bug/Booking-places-in-past-competitions"""
+
+     # Test route /showSummary
+     email = "admin@irontemple.com"
+     form_data = {"email":email}
+
+     mocker.patch.object(server, 'competitions', competitions)
+
+     response = client.post('/showSummary', data=form_data)
+     content = response.data
+     soup = BeautifulSoup(content, 'html.parser')
+     next_competitions = soup.find("ul", class_="next_competitions")
+     past_competitions = soup.find("ul", class_="past_competitions")
+     for competition in competitions:
+          if competition["date"] > datetime.now().strftime("%Y-%m-%d %H:%M:%S"):
+               print(f"{competition['name']} is in next competitions")
+               assert competition["name"] in next_competitions.text
+          else:
+               print(f"{competition['name']} is in past competitions")
+               assert competition["name"] in past_competitions.text
+
+
+     # Test route /book/<competition>/<club>
+     response = client.post('/book/competition_not_exists/club_not_exists')
+     content = response.data
+     soup = BeautifulSoup(content, 'html.parser')
+     next_competitions = soup.find("ul", class_="next_competitions")
+     past_competitions = soup.find("ul", class_="past_competitions")
+     for competition in competitions:
+          if competition["date"] > datetime.now().strftime("%Y-%m-%d %H:%M:%S"):
+               print(f"{competition['name']} is in next competitions")
+               assert competition["name"] in next_competitions.text
+          else:
+               print(f"{competition['name']} is in past competitions")
+               assert competition["name"] in past_competitions.text
+
+     # Test route /purchasePlaces
+     club = "Simply Lift"
+     competition = "Competition dans le future"
+     places = "1"
+
+     form_data = {
+          "club":club,
+          "competition":competition,
+          "places":places
+          }
+
+     mocker.patch.object(server, 'competitions', competitions)
+
+     response = client.post('/purchasePlaces', data=form_data)
+     content = response.data
+     soup = BeautifulSoup(content, 'html.parser')
+     next_competitions = soup.find("ul", class_="next_competitions")
+     past_competitions = soup.find("ul", class_="past_competitions")
+     for competition in competitions:
+          if competition["date"] > datetime.now().strftime("%Y-%m-%d %H:%M:%S"):
+               print(f"{competition['name']} is in next competitions")
+               assert competition["name"] in next_competitions.text
+          else:
+               print(f"{competition['name']} is in past competitions")
+               assert competition["name"] in past_competitions.text
 
 
 def test_should_return_code_200_when_purchasing_places(client):
@@ -20,38 +99,8 @@ def test_should_return_code_200_when_purchasing_places(client):
      assert response.status_code == 200
 
 
-def test_should_update_points_of_club_when_purchasing_places(mocker, client):
+def test_should_update_points_of_club_when_purchasing_places(mocker, client, clubs, competitions):
      """correction bug/Point-updates-are-not-reflected"""
-     competitions = [
-          {
-               'name': 'Spring Festival',
-               'date': '2020-03-27 10:00:00',
-               'numberOfPlaces': '25'
-          },
-          {
-               'name': 'Fall Classic',
-               'date': '2020-10-22 13:30:00',
-               'numberOfPlaces': '13'
-          }
-     ]
-
-     clubs = [
-          {
-               'name': 'Simply Lift',
-               'email': 'john@simplylift.co',
-               'points': '10'
-          },
-          {
-               'name': 'Iron Temple',
-               'email': 'admin@irontemple.com',
-               'points': '10'
-          },
-          {
-               'name': 'She Lifts',
-               'email': 'kate@shelifts.co.uk',
-               'points': '10'
-          }
-     ]
 
      mocker.patch.object(server, 'competitions', competitions)
      mocker.patch.object(server, 'clubs', clubs)
