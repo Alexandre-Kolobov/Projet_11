@@ -20,6 +20,7 @@ app.secret_key = 'something_special'
 
 competitions = loadCompetitions()
 clubs = loadClubs()
+list_club_places_per_competition = []
 
 @app.route('/')
 def index():
@@ -57,13 +58,40 @@ def book(competition,club):
 
 @app.route('/purchasePlaces',methods=['POST'])
 def purchasePlaces():
+    error_message = "Error: you can't book more than 12 places per competition!"
+    validation_message = "Great-booking complete!"
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
     competition = [c for c in competitions if c['name'] == request.form['competition']][0]
     club = [c for c in clubs if c['name'] == request.form['club']][0]
     placesRequired = int(request.form['places'])
     competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
     club['points'] = int(club['points'])-placesRequired  #correction bug/Point-updates-are-not-reflected 
-    flash('Great-booking complete!')
+    
+
+    check_of_booked_places = [
+        club_places_per_competition for club_places_per_competition in list_club_places_per_competition
+        if club_places_per_competition["club_name"]==club["name"] and club_places_per_competition["competition_name"]==competition["name"]
+        ]
+    
+    if check_of_booked_places:
+        sum_of_places = int(check_of_booked_places[0]["booked_places"]) + placesRequired
+        if sum_of_places > 12:
+            flash(error_message)
+        else:
+            check_of_booked_places[0]["booked_places"] = sum_of_places
+            flash(validation_message)
+    else:
+        if placesRequired > 12:
+            flash(error_message)
+        else:
+            dict_club_places_per_competition = {
+                "club_name":club["name"],
+                "competition_name":competition["name"],
+                "booked_places":placesRequired
+            }
+            list_club_places_per_competition.append(dict_club_places_per_competition)
+            flash(validation_message)
 
     return render_template('welcome.html',
                            club=club,

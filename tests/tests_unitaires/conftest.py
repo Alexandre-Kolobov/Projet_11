@@ -55,3 +55,9 @@ def competitions():
         }
     ]
     return competitions
+
+@pytest.fixture
+def list_club_places_per_competition():
+    list_club_places_per_competition = []
+
+    return list_club_places_per_competition
