@@ -45,10 +45,13 @@ def book(competition,club):
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     foundClub = [c for c in clubs if c['name'] == club][0]
     foundCompetition = [c for c in competitions if c['name'] == competition][0]
-    if foundClub and foundCompetition:
+    if foundClub and foundCompetition and foundCompetition["date"] > current_time:
         return render_template('booking.html',club=foundClub,competition=foundCompetition)
     else:
-        flash("Something went wrong-please try again")
+        if foundCompetition["date"] < current_time:
+            flash("You can't book places for past competition")
+        else:
+            flash("Something went wrong-please try again")
 
         return render_template('welcome.html',
                                club=club,

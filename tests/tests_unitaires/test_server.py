@@ -43,19 +43,13 @@ def test_should_not_allow_booking_for_past_competition(mocker, client, competiti
 
 
      # Test route /book/<competition>/<club>
-     response = client.post('/book/Spring Festival/club_not_exists')
+     response = client.get('/book/Spring Festival/She Lifts')
      content = response.data
      soup = BeautifulSoup(content, 'html.parser')
-     next_competitions = soup.find("ul", class_="next_competitions")
-     past_competitions = soup.find("ul", class_="past_competitions")
-     print(soup)
-     for competition in competitions:
-          if competition["date"] > datetime.now().strftime("%Y-%m-%d %H:%M:%S"):
-               # print(f"{competition['name']} is in next competitions")
-               assert competition["name"] in next_competitions.text
-          else:
-               # print(f"{competition['name']} is in past competitions")
-               assert competition["name"] in past_competitions.text
+     message = soup.find("ul", class_="message_flash")
+     string_to_test = "You can't book places for past competition"
+     assert string_to_test in message.text
+
 
      # Test route /purchasePlaces
      club = "Simply Lift"
