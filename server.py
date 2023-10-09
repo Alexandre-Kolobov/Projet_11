@@ -61,15 +61,22 @@ def book(competition,club):
 
 @app.route('/purchasePlaces',methods=['POST'])
 def purchasePlaces():
-    error_message = "Error: you can't book more than 12 places per competition!"
+    error_message_overbook_competition = "Error: you can't book more than 12 places per competition!"
+    error_message_not_enought_points = "You can't book more places than points your club has"
     validation_message = "Great-booking complete!"
+
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
     competition = [c for c in competitions if c['name'] == request.form['competition']][0]
     club = [c for c in clubs if c['name'] == request.form['club']][0]
     placesRequired = int(request.form['places'])
     competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
-    club['points'] = int(club['points'])-placesRequired  #correction bug/Point-updates-are-not-reflected 
+
+    #  correction bug/Point-updates-are-not-reflected and bug/Clubs-should-not-be-able-to-use-more-than-their-points-allowed
+    if int(club['points'])-placesRequired < 0:
+        flash(error_message_not_enought_points)
+    else:
+        club['points'] = int(club['points'])-placesRequired
     
 
     check_of_booked_places = [
@@ -80,13 +87,13 @@ def purchasePlaces():
     if check_of_booked_places:
         sum_of_places = int(check_of_booked_places[0]["booked_places"]) + placesRequired
         if sum_of_places > 12:
-            flash(error_message)
+            flash(error_message_overbook_competition)
         else:
             check_of_booked_places[0]["booked_places"] = sum_of_places
             flash(validation_message)
     else:
         if placesRequired > 12:
-            flash(error_message)
+            flash(error_message_overbook_competition)
         else:
             dict_club_places_per_competition = {
                 "club_name":club["name"],

@@ -71,10 +71,10 @@ def test_should_not_allow_booking_for_past_competition(mocker, client, competiti
      past_competitions = soup.find("ul", class_="past_competitions")
      for competition in competitions:
           if competition["date"] > datetime.now().strftime("%Y-%m-%d %H:%M:%S"):
-               print(f"{competition['name']} is in next competitions")
+               # print(f"{competition['name']} is in next competitions")
                assert competition["name"] in next_competitions.text
           else:
-               print(f"{competition['name']} is in past competitions")
+               # print(f"{competition['name']} is in past competitions")
                assert competition["name"] in past_competitions.text
 
 
@@ -217,7 +217,7 @@ def test_should_not_book_more_than_12_places_par_competition_in_many_times(mocke
      content = response.data
      soup = BeautifulSoup(content, 'html.parser')
      message = soup.find("ul", class_="message_flash")
-     print(message)
+     # print(message)
      string_to_test = "Great-booking complete!"
      assert string_to_test in message.text
 
@@ -225,8 +225,54 @@ def test_should_not_book_more_than_12_places_par_competition_in_many_times(mocke
      content = response.data
      soup = BeautifulSoup(content, 'html.parser')
      message = soup.find("ul", class_="message_flash")
-     print(message)
+     # print(message)
      string_to_test = "Error: you can't book more than 12 places per competition!"
      assert string_to_test in message.text
 
+
+def test_club_should_use_points_to_book_places(mocker, client, clubs, competitions, list_club_places_per_competition):
+     """correction bug/Clubs-should-not-be-able-to-use-more-than-their-points-allowed"""
+     mocker.patch.object(server, 'competitions', competitions)
+     mocker.patch.object(server, 'clubs', clubs)
+     mocker.patch.object(server, 'list_club_places_per_competition', list_club_places_per_competition)
+
+     club = "Simply Lift"  # Ce club a 10 points en tout
+     competition = "Competition dans le future"
+     places = "10"
+
+     form_data = {
+          "club":club,
+          "competition":competition,
+          "places":places}
      
+     response = client.post('/purchasePlaces', data=form_data)
+     content = response.data
+     soup = BeautifulSoup(content, 'html.parser')
+     message = soup.find("ul", class_="message_flash")
+     # print(message)
+     string_to_test = "Great-booking complete!"
+     assert string_to_test in message.text
+
+
+def test_club_should_not_use_more_points_they_have_to_book_places(mocker, client, clubs, competitions, list_club_places_per_competition):
+     """correction bug/Clubs-should-not-be-able-to-use-more-than-their-points-allowed"""
+     mocker.patch.object(server, 'competitions', competitions)
+     mocker.patch.object(server, 'clubs', clubs)
+     mocker.patch.object(server, 'list_club_places_per_competition', list_club_places_per_competition)
+
+     club = "Simply Lift"  # Ce club a 10 points en tout
+     competition = "Competition dans le future"
+     places = "11"
+
+     form_data = {
+          "club":club,
+          "competition":competition,
+          "places":places}
+     
+     response = client.post('/purchasePlaces', data=form_data)
+     content = response.data
+     soup = BeautifulSoup(content, 'html.parser')
+     message = soup.find("ul", class_="message_flash")
+     # print(message)
+     string_to_test = "You can't book more places than points your club has"
+     assert string_to_test in message.text
