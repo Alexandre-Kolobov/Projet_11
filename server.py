@@ -28,9 +28,15 @@ def index():
 
 @app.route('/showSummary',methods=['POST'])
 def showSummary():
+    error_message_email_fail = "Sorry, that email wasn't found."
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    club = [club for club in clubs if club['email'] == request.form['email']][0]
+    try:
+        club = [club for club in clubs if club['email'] == request.form['email']][0]
+    except IndexError:
+        flash(error_message_email_fail)
+        return redirect(url_for('index'))
+     
     
     return render_template(
         'welcome.html',

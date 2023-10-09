@@ -1,6 +1,7 @@
 import server
 from bs4 import BeautifulSoup
 from datetime import datetime
+from flask import url_for
 
 """
 Liste de test à réaliser:
@@ -9,14 +10,36 @@ Error trouvés:
 """
 
 
-def test_should_return_code_200_when_connected(client):
-     
+def test_should_redirect_to_showSummary_if_email_exists(client):
+     """correction bug/Entering-a-unknown-email-crashes-the-app"""
      email = "admin@irontemple.com"
      form_data = {"email":email}
 
      response = client.post('/showSummary', data=form_data)
+     content = response.data
+     soup = BeautifulSoup(content, 'html.parser')
+     element_to_parse = soup.find("h2")
+     string_to_test = f"Welcome, {email}"
+     # print(element_to_parse)
+     assert string_to_test in element_to_parse.text
 
-     assert response.status_code == 200
+
+def test_should_show_error_if_email_doesnt_exists(client):
+     """correction bug/Entering-a-unknown-email-crashes-the-app"""
+     email = "test@gmail.com"
+     form_data = {"email":email}
+
+     response = client.post('/showSummary', data=form_data)
+     assert response.status_code == 302
+     assert response.headers["location"] == url_for('index', _external=True)
+     
+     response = client.post('/showSummary', data=form_data, follow_redirects=True)
+     content = response.data
+     soup = BeautifulSoup(content, 'html.parser')
+     element_to_parse = soup.find("ul", class_="message_flash")
+     string_to_test = "Sorry, that email wasn't found."
+     assert string_to_test in element_to_parse.text
+     
 
 
 def test_should_not_allow_booking_for_past_competition(mocker, client, competitions):
