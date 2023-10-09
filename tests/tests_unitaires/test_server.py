@@ -274,5 +274,5 @@ def test_club_should_not_use_more_points_they_have_to_book_places(mocker, client
      soup = BeautifulSoup(content, 'html.parser')
      message = soup.find("ul", class_="message_flash")
      # print(message)
-     string_to_test = "You can't book more places than points your club has"
+     string_to_test = "Error: you can't book more places than points your club has"
      assert string_to_test in message.text

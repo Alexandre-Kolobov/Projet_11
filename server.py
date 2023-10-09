@@ -62,7 +62,7 @@ def book(competition,club):
 @app.route('/purchasePlaces',methods=['POST'])
 def purchasePlaces():
     error_message_overbook_competition = "Error: you can't book more than 12 places per competition!"
-    error_message_not_enought_points = "You can't book more places than points your club has"
+    error_message_not_enought_points = "Error: you can't book more places than points your club has"
     validation_message = "Great-booking complete!"
 
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
