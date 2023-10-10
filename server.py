@@ -24,7 +24,7 @@ list_club_places_per_competition = []
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', clubs=clubs)
 
 @app.route('/showSummary',methods=['POST'])
 def showSummary():
@@ -42,7 +42,8 @@ def showSummary():
         'welcome.html',
         club=club,
         competitions=competitions,
-        current_time=current_time
+        current_time=current_time,
+        clubs=clubs
         )
 
 
@@ -77,13 +78,6 @@ def purchasePlaces():
     club = [c for c in clubs if c['name'] == request.form['club']][0]
     placesRequired = int(request.form['places'])
     competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
-
-    #  correction bug/Point-updates-are-not-reflected and bug/Clubs-should-not-be-able-to-use-more-than-their-points-allowed
-    # if int(club['points'])-placesRequired < 0:
-    #     flash(error_message_not_enought_points)
-    # else:
-    #     club['points'] = int(club['points'])-placesRequired
-    
 
     check_of_booked_places = [
         club_places_per_competition for club_places_per_competition in list_club_places_per_competition
@@ -121,10 +115,10 @@ def purchasePlaces():
     return render_template('welcome.html',
                            club=club,
                            competitions=competitions,
-                           current_time=current_time)
+                           current_time=current_time,
+                           clubs=clubs)
 
 
-# TODO: Add route for points display
 
 
 @app.route('/logout')

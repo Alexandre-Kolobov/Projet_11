@@ -41,7 +41,6 @@ def test_should_show_error_if_email_doesnt_exists(client):
      assert string_to_test in element_to_parse.text
      
 
-
 def test_should_not_allow_booking_for_past_competition(mocker, client, competitions):
      """correction bug/Booking-places-in-past-competitions"""
 
@@ -165,6 +164,7 @@ def test_should_book_0_to_12_places_par_competition_in_one_time(mocker, client, 
      string_to_test = "Great-booking complete!"
      assert string_to_test in message.text
 
+
 def test_should_book_0_to_12_places_par_competition_in_many_times(mocker, client, clubs, competitions, list_club_places_per_competition):
      """correction bug/Clubs-should-not-be-able-to-book-more-than-12-places-per-competition"""
      mocker.patch.object(server, 'competitions', competitions)
@@ -278,8 +278,6 @@ def test_should_not_update_club_points_if_reservation_error(mocker, client, club
      assert string_to_test in message.text
 
 
-
-
 def test_club_should_use_points_to_book_places(mocker, client, clubs, competitions, list_club_places_per_competition):
      """correction bug/Clubs-should-not-be-able-to-use-more-than-their-points-allowed"""
      mocker.patch.object(server, 'competitions', competitions)
@@ -342,3 +340,43 @@ def test_club_should_not_use_more_points_they_have_to_book_places(mocker, client
      # print(message)
      string_to_test = "Error: you can't book more places than points your club has"
      assert string_to_test in message.text
+
+
+def test_should_show_table_with_clubs_points(mocker, client, competitions, clubs):
+     mocker.patch.object(server, 'clubs', clubs)
+     mocker.patch.object(server, 'competitions', competitions)
+
+     # Test fonctionnement sur route index
+     response = client.get('/')
+     content = response.data
+     soup = BeautifulSoup(content, 'html.parser')
+     table = soup.find("table")
+     headers = table.find_all('tr')[0].find_all('th')
+     assert headers[0].text == "Clubs"
+     assert headers[1].text == "Points"
+
+     i = 1
+     for club in clubs:
+          table_body = table.find_all('tr')[i].find_all('td')
+          assert table_body[0].text == club["name"]
+          assert table_body[1].text == club["points"]
+          i+=1
+
+     # Test fonctionnement sur route showSummary
+     email = "admin@irontemple.com"
+     form_data = {"email":email}
+
+     response = client.post('/showSummary', data=form_data)
+     content = response.data
+     soup = BeautifulSoup(content, 'html.parser')
+     table = soup.find("table")
+     headers = table.find_all('tr')[0].find_all('th')
+     assert headers[0].text == "Clubs"
+     assert headers[1].text == "Points"
+
+     i = 1
+     for club in clubs:
+          table_body = table.find_all('tr')[i].find_all('td')
+          assert table_body[0].text == club["name"]
+          assert table_body[1].text == club["points"]
+          i+=1

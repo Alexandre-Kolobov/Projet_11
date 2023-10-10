@@ -1,0 +1,15 @@
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+<table>
+    <tr>
+        <th>Clubs</th>
+        <th>Points</th> 
+    </tr>
+    {% for club in clubs %}
+        <tr>
+            <td>{{club["name"]}}</td>
+            <td>{{club["points"]}}</td> 
+        </tr>
+    {% endfor %}
+</table>
