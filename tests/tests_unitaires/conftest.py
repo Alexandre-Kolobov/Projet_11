@@ -15,7 +15,7 @@ def clubs():
         {
            'name': 'Simply Lift',
            'email': 'john@simplylift.co',
-           'points': '10'
+           'points': '15'
         },
         {
             'name': 'Iron Temple',

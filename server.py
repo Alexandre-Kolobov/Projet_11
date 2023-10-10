@@ -79,10 +79,10 @@ def purchasePlaces():
     competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
 
     #  correction bug/Point-updates-are-not-reflected and bug/Clubs-should-not-be-able-to-use-more-than-their-points-allowed
-    if int(club['points'])-placesRequired < 0:
-        flash(error_message_not_enought_points)
-    else:
-        club['points'] = int(club['points'])-placesRequired
+    # if int(club['points'])-placesRequired < 0:
+    #     flash(error_message_not_enought_points)
+    # else:
+    #     club['points'] = int(club['points'])-placesRequired
     
 
     check_of_booked_places = [
@@ -96,18 +96,27 @@ def purchasePlaces():
             flash(error_message_overbook_competition)
         else:
             check_of_booked_places[0]["booked_places"] = sum_of_places
-            flash(validation_message)
+            if int(club['points'])-placesRequired < 0:
+                flash(error_message_not_enought_points)
+            else:
+                club['points'] = int(club['points'])-placesRequired
+                flash(validation_message)
     else:
         if placesRequired > 12:
             flash(error_message_overbook_competition)
         else:
-            dict_club_places_per_competition = {
-                "club_name":club["name"],
-                "competition_name":competition["name"],
-                "booked_places":placesRequired
-            }
-            list_club_places_per_competition.append(dict_club_places_per_competition)
-            flash(validation_message)
+            if int(club['points'])-placesRequired < 0:
+                flash(error_message_not_enought_points)
+            else:
+                club['points'] = int(club['points'])-placesRequired
+
+                dict_club_places_per_competition = {
+                    "club_name":club["name"],
+                    "competition_name":competition["name"],
+                    "booked_places":placesRequired
+                }
+                list_club_places_per_competition.append(dict_club_places_per_competition)
+                flash(validation_message)
 
     return render_template('welcome.html',
                            club=club,
