@@ -6,7 +6,7 @@ from flask import url_for
 """
 Liste de test à réaliser:
 Error trouvés:
-     Pour '/book/<competition>/<club>' if else à tester
+     Si je reserve plus de 12 places, compteur de club se met à jour quand même 
 """
 
 
