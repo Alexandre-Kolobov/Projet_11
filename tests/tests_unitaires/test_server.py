@@ -3,12 +3,6 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from flask import url_for
 
-"""
-Liste de test à réaliser:
-Error trouvés:
-     Si je reserve plus de 12 places, compteur de club se met à jour quand même 
-"""
-
 
 def test_should_redirect_to_showSummary_if_email_exists(client):
      """correction bug/Entering-a-unknown-email-crashes-the-app"""
@@ -114,6 +108,168 @@ def test_should_return_code_200_when_purchasing_places(client):
      response = client.post('/purchasePlaces', data=form_data)
 
      assert response.status_code == 200
+
+
+def test_should_not_update_points_of_competiton_when_reservation_was_cancelled(mocker, client, clubs, competitions):
+     """correction bug/Competition_points_updated_even_if_reservation_was_canceled"""
+
+     mocker.patch.object(server, 'competitions', competitions)
+     mocker.patch.object(server, 'clubs', clubs)
+     
+     
+     # Cas ou un club commande plus de place qu'ils ont des points
+     club_name = "Simply Lift"
+
+     for club in clubs:
+          if club["name"] == club_name:
+               club["points"] = 1
+
+     competition_name = "Competition dans le future"
+     for competition in competitions:
+          if competition["name"] == competition_name:
+               competition["numberOfPlaces"] = 25
+
+
+     places = "2"
+
+     form_data = {
+          "club":club_name,
+          "competition":competition_name,
+          "places":places}
+     
+     selected_competition_data  = [
+          (competition["numberOfPlaces"], competition["date"])
+          for competition in competitions
+          if competition["name"]==form_data["competition"]
+          ]
+     
+     selected_competition_places, selected_competition_date = selected_competition_data[0]
+
+     response = client.post('/purchasePlaces', data=form_data)
+     content = response.data
+     soup = BeautifulSoup(content, 'html.parser')
+     next_competitions = soup.find("ul", class_="next_competitions")
+     
+     string_to_test = f'{competition_name} Date: {selected_competition_date} Number of Places: {selected_competition_places}'
+     assert string_to_test in next_competitions.text
+
+
+     # Cas ou un club commande plus de 12 places
+     club_name = "Simply Lift"
+
+     for club in clubs:
+          if club["name"] == club_name:
+               club["points"] = 15
+
+     competition_name = "Competition dans le future"
+     for competition in competitions:
+          if competition["name"] == competition_name:
+               competition["numberOfPlaces"] = 20
+
+
+     places = "16"
+
+     form_data = {
+          "club":club_name,
+          "competition":competition_name,
+          "places":places}
+     
+     selected_competition_data  = [
+          (competition["numberOfPlaces"], competition["date"])
+          for competition in competitions
+          if competition["name"]==form_data["competition"]
+          ]
+     
+     selected_competition_places, selected_competition_date = selected_competition_data[0]
+
+     response = client.post('/purchasePlaces', data=form_data)
+     content = response.data
+     soup = BeautifulSoup(content, 'html.parser')
+     next_competitions = soup.find("ul", class_="next_competitions")
+
+     string_to_test = f'{competition_name} Date: {selected_competition_date} Number of Places: {selected_competition_places}'
+     assert string_to_test in next_competitions.text
+
+
+     # Cas ou un un club commande plus de place qu'une competition a
+     club_name = "Simply Lift"
+
+     for club in clubs:
+          if club["name"] == club_name:
+               club["points"] = 15
+
+     competition_name = "Competition dans le future"
+     for competition in competitions:
+          if competition["name"] == competition_name:
+               competition["numberOfPlaces"] = 4
+
+
+     places = "11"
+
+     form_data = {
+          "club":club_name,
+          "competition":competition_name,
+          "places":places}
+     
+     selected_competition_data  = [
+          (competition["numberOfPlaces"], competition["date"])
+          for competition in competitions
+          if competition["name"]==form_data["competition"]
+          ]
+     
+     selected_competition_places, selected_competition_date = selected_competition_data[0]
+     
+     response = client.post('/purchasePlaces', data=form_data)
+     content = response.data
+     soup = BeautifulSoup(content, 'html.parser')
+     next_competitions = soup.find("ul", class_="next_competitions")
+     
+     string_to_test = f'{competition_name} Date: {selected_competition_date} Number of Places: {selected_competition_places}'
+     assert string_to_test in next_competitions.text
+
+
+def test_should_update_points_of_competiton_when_reservation_validated(mocker, client, clubs, competitions):
+     """correction bug/Competition_points_updated_even_if_reservation_was_canceled"""
+
+     mocker.patch.object(server, 'competitions', competitions)
+     mocker.patch.object(server, 'clubs', clubs)
+     
+     club_name = "Simply Lift"
+
+     for club in clubs:
+          if club["name"] == club_name:
+               club["points"] = 15
+
+     competition_name = "Competition dans le future"
+     for competition in competitions:
+          if competition["name"] == competition_name:
+               competition["numberOfPlaces"] = 25
+
+
+     places = "2"
+
+     form_data = {
+          "club":club_name,
+          "competition":competition_name,
+          "places":places}
+     
+     selected_competition_data  = [
+          (competition["numberOfPlaces"], competition["date"])
+          for competition in competitions
+          if competition["name"]==form_data["competition"]
+          ]
+     
+     selected_competition_places, selected_competition_date = selected_competition_data[0]
+
+     response = client.post('/purchasePlaces', data=form_data)
+     content = response.data
+     soup = BeautifulSoup(content, 'html.parser')
+     next_competitions = soup.find("ul", class_="next_competitions")
+     sum_places = int(selected_competition_places) - int(places)
+     
+     string_to_test = f'{competition_name} Date: {selected_competition_date} Number of Places: {str(sum_places)}'
+     print(string_to_test)
+     assert string_to_test in next_competitions.text
 
 
 def test_should_update_points_of_club_when_purchasing_places(mocker, client, clubs, competitions):

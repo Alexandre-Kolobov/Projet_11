@@ -28,15 +28,13 @@
             {% for comp in competitions %} 
                 {% if current_time < comp['date'] %}
                     <li>
-                        {{comp['name']}}<br />
-                        Date: {{comp['date']}}</br>
-                        Number of Places: {{comp['numberOfPlaces']}}
-                        {%if comp['numberOfPlaces']|int >0%}
-                            <a href="{{ url_for('book',competition=comp['name'],club=club['name']) }}">Book Places</a>
-                        {% endif %}
-                        <p></p>
+                        <p>
+                            {{comp['name']}}<br /> Date: {{comp['date']}}<br /> Number of Places: {{comp['numberOfPlaces']}}<br />
+                            {%if comp['numberOfPlaces']|int >0%}
+                                <a href="{{ url_for('book',competition=comp['name'],club=club['name']) }}">Book Places</a>
+                            {% endif %}
+                        </p>
                     </li>
-
                 {% endif %}
             {% endfor %}
             <hr />
