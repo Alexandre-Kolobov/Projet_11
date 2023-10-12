@@ -1,8 +1,6 @@
-import server
 from server import competitions, clubs
 from bs4 import BeautifulSoup
 from datetime import datetime
-from flask import url_for
 
 def test_login_summary_book_purchase_logout(client):
     email = clubs[0]["email"]
