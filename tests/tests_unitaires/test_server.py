@@ -33,7 +33,11 @@ def test_should_show_error_if_email_doesnt_exists(client):
      element_to_parse = soup.find("ul", class_="message_flash")
      string_to_test = "Sorry, that email wasn't found."
      assert string_to_test in element_to_parse.text
-     
+
+def test_should_allow_booking_for_future_competition(mocker, client, competitions):
+     response = client.get('/book/Competition dans le future/She Lifts')
+     assert response.status_code == 200
+     assert b"How many places?" in response.data
 
 def test_should_not_allow_booking_for_past_competition(mocker, client, competitions):
      """correction bug/Booking-places-in-past-competitions"""
