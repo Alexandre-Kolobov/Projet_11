@@ -12,5 +12,19 @@
     {   "name":"She Lifts",
         "email": "kate@shelifts.co.uk",
         "points":"12"
+    },
+    {
+        "name":"Lift for life",
+        "email":"john@simplylift1.co",
+        "points":"13"
+    },
+    {
+        "name":"Iron Temple Budda",
+        "email": "admin@irontempledd.com",
+        "points":"4"
+    },
+    {   "name":"He Lifts",
+        "email": "bob@shelifts.co.uk",
+        "points":"12"
     }
 ]}
