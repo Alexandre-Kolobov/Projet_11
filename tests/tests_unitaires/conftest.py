@@ -9,6 +9,7 @@ def client():
     with app.test_client() as client:
         yield client
 
+
 @pytest.fixture
 def clubs():
     clubs = [
@@ -29,6 +30,7 @@ def clubs():
         }
     ]
     return clubs
+
 
 @pytest.fixture
 def competitions():
@@ -55,6 +57,7 @@ def competitions():
         }
     ]
     return competitions
+
 
 @pytest.fixture
 def list_club_places_per_competition():

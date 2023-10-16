@@ -3,8 +3,6 @@ import json
 import random
 
 
-
-
 class PerfTest(HttpUser):
     wait_time = between(0, 2)
 
@@ -17,7 +15,6 @@ class PerfTest(HttpUser):
     def on_start(self):
         self.random_club = self.clubs.pop(0)
         self.random_competition = random.choice(self.competitions)
- 
 
     @task
     def index(self):
@@ -34,9 +31,9 @@ class PerfTest(HttpUser):
     @task
     def purchase(self):
         form_data = {
-            "club":self.random_club['name'],
-            "competition":self.random_competition['name'],
-            "places":1
+            "club": self.random_club['name'],
+            "competition": self.random_competition['name'],
+            "places": 1
             }
         self.client.post("/purchasePlaces", data=form_data)
 
